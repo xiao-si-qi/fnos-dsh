@@ -28,7 +28,7 @@ lastVerified: 2026-09-17
 
 插件的调试依赖本机运行的 DSH Web。此前开发者必须自行用全局 `dsh` 启动，并手工决定 `DSH_HOME`：全局安装的版本未必等于仓库锁定版本，profile 又会落在 `$HOME/.dsh`，与仓库的插件版本、工作区和文档脱节，既无法复现 FPK 里的运行时基线，也容易污染个人 DSH 数据。
 
-本需求同时把 DSH 开发环境纳入仓库：根依赖声明与 FPK 相同的 `@deepseek-ai/dsh@0.1.5-rc.2`，`fn-apps-cli start` 增加「DSH Web」启动目标，并以仓库根 `.dsh` 作为该实例的 `DSH_HOME`，让 profile、凭据、会话和本地插件调试数据都留在检出目录内。
+本需求同时把 DSH 开发环境纳入仓库：根依赖声明与 FPK 相同的 `@deepseek-ai/dsh@0.1.7-rc.2`，`fn-apps-cli start` 增加「DSH Web」启动目标，并以仓库根 `.dsh` 作为该实例的 `DSH_HOME`，让 profile、凭据、会话和本地插件调试数据都留在检出目录内。
 
 ### 移植依据
 
@@ -140,7 +140,7 @@ lastVerified: 2026-09-17
 
 ### 本地 DSH 开发环境
 
-- 根依赖版本必须与 FPK 运行时基线一致（当前 `0.1.5-rc.2`）；基线升级时两者同步修改，不允许本地开发环境长期偏离 FPK。
+- 根依赖版本必须与 FPK 运行时基线一致（当前 `0.1.7-rc.2`）；基线升级时两者同步修改，不允许本地开发环境长期偏离 FPK。
 - DSH Web 与「Harness 插件」「项目文档」并列显示在同一个启动多选提示中；选择被取消时不启动任何目标。
 - DSH Web 与「Harness 插件」「项目文档」可以任意组合同时启动，并始终保留 Turbo 的 TUI：三者由 `start` 交给**同一个 `turbo watch`**，DSH Web 作为仓库根任务 `//#dev:web` 与 `dev` 并列显示在同一个 TUI 中。不得为了让两者共存而关闭 TUI，也不得在 Turbo 之外另起第二个前台进程。
 - 启动命令必须在子进程环境中注入 `DSH_HOME=<仓库根>/.dsh`，并清除从调用者继承的 DSH 会话身份（`DSH_SESSION_ID`、`DSH_SHELL`、`DSH_WEB_URL`），使本地实例是独立进程而不是当前会话的嵌套视图。
@@ -256,7 +256,7 @@ lastVerified: 2026-09-17
 
 ### FNOS-005-11 验收条件
 
-- `FNOS-005-11-AC-01`：仓库根 `pnpm install` 后 `node_modules/.bin/dsh --version` 输出 `0.1.5-rc.2`，与 FPK 运行时基线一致。
+- `FNOS-005-11-AC-01`：仓库根 `pnpm install` 后 `node_modules/.bin/dsh --version` 输出 `0.1.7-rc.2`，与 FPK 运行时基线一致。
 - `FNOS-005-11-AC-02`：`pnpm install` 在无编译器、无交互的机器上完成，不因 DSH 原生依赖安装脚本中断。
 
 ### FNOS-005-12 验收条件

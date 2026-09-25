@@ -70,7 +70,7 @@ describe('bundled plugin install', () => {
     await mkdir(installed, { recursive: true })
 
     const output = await runShell(root, [
-      `force_install_bundled_plugin '@tnnevol/dsh-fnos' '0.1.5-rc.2' '${join(root, 'bundled', 'dsh-fnos.tgz')}' '0.1.5-rc.2'`,
+      `force_install_bundled_plugin '@tnnevol/dsh-fnos' '0.1.7-rc.2' '${join(root, 'bundled', 'dsh-fnos.tgz')}' '0.1.7-rc.2'`,
     ].join('\n'))
 
     expect(output).toContain('remove:@tnnevol/dsh-fnos')
@@ -82,7 +82,7 @@ describe('bundled plugin install', () => {
     const root = await makeProfile()
     const archive = join(root, 'bundled', 'dsh-fnos.tgz')
     const output = await runShell(root, [
-      `force_install_bundled_plugin '@tnnevol/dsh-fnos' '0.1.5-rc.2' '${archive}' ''`,
+      `force_install_bundled_plugin '@tnnevol/dsh-fnos' '0.1.7-rc.2' '${archive}' ''`,
     ].join('\n'))
 
     expect(output).not.toContain('remove:')

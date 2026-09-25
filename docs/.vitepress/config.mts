@@ -184,7 +184,7 @@ const requirementsSidebar = [
         link: '/requirements/FNOS-003-fpk-runtime-settings'
       },
       {
-        text: 'FNOS-004 DSH 0.1.5-rc.2 适配',
+        text: 'FNOS-004 DSH 0.1.7-rc.2 适配',
         link: '/requirements/FNOS-004-dsh-015-rc2-adaptation'
       },
       {
@@ -217,7 +217,7 @@ const plansSidebar = [
         link: '/plans/PLAN-FNOS-003-fpk-runtime-settings'
       },
       {
-        text: 'PLAN-FNOS-004 DSH 0.1.5-rc.2 适配与 FPK 运行修复',
+        text: 'PLAN-FNOS-004 DSH 0.1.7-rc.2 适配与 FPK 运行修复',
         link: '/plans/PLAN-FNOS-004-dsh-015-rc2-adaptation'
       },
       {

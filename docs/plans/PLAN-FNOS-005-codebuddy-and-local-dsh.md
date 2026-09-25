@@ -18,14 +18,14 @@ lastVerified: 2026-09-17
 | 对应需求 | [FNOS-005 CodeBuddy 成长任务移植与仓库内 DSH 开发环境](/requirements/FNOS-005-codebuddy-and-local-dsh) |
 | 本轮功能 | `FNOS-005-01` 至 `FNOS-005-16`：成长任务列表与状态、单任务/一键完成 + 自动领奖、任务中心扫描与执行队列、不可自动化任务指引、运营周期开关收拢到管理面板、「完成任务」按钮、个人成长任务收拢到弹框、执行状态持久化、任务执行日志抽屉、单账号「一键完成」与跨账号互斥、风控指纹对齐与「跑完但没完成」修复，以及仓库内 DSH CLI、本地 DSH Web 启动目标、本地 `DSH_HOME` 与仓库插件自动内置 |
 | 移植来源 | `workbuddy2api-panel`（`~/workspace/fork-pj/workbuddy2api-panel`） |
-| 上游依据 | `@deepseek-ai/dsh@0.1.5-rc.2`（与 FPK 运行时基线一致） |
+| 上游依据 | `@deepseek-ai/dsh@0.1.7-rc.2`（与 FPK 运行时基线一致） |
 | 计划状态 | <Badge type="tip" text="已完成" /> |
 
 ## 计划目标
 
 将 `workbuddy2api-panel` 的 CodeBuddy 成长任务能力移植到本仓库 CodeBuddy 插件：复用现有账号 AccessToken、行为事件上报指纹与 per-account 锁，实现成长任务列表/报名/进度回读/自动领奖，以及任务中心的全账号扫描与执行队列。开学季活动不在本轮范围。
 
-同一计划把 DSH 开发环境纳入仓库：根依赖声明与 FPK 相同的 `@deepseek-ai/dsh@0.1.5-rc.2`，`fn-apps-cli start` 增加「DSH Web」启动目标，并以仓库根 `.dsh` 作为该实例的 `DSH_HOME`，使插件调试可以直接对着仓库锁定的运行时基线进行，profile 与凭据留在检出目录。本轮不修改 DSH 官方源码、profile 组合或 DSH CLI 参数语义，也不改变 FPK 的 DSH 版本策略、私有 CLI 安装方式与网关 Web 生命周期。
+同一计划把 DSH 开发环境纳入仓库：根依赖声明与 FPK 相同的 `@deepseek-ai/dsh@0.1.7-rc.2`，`fn-apps-cli start` 增加「DSH Web」启动目标，并以仓库根 `.dsh` 作为该实例的 `DSH_HOME`，使插件调试可以直接对着仓库锁定的运行时基线进行，profile 与凭据留在检出目录。本轮不修改 DSH 官方源码、profile 组合或 DSH CLI 参数语义，也不改变 FPK 的 DSH 版本策略、私有 CLI 安装方式与网关 Web 生命周期。
 
 ## 实现范围和边界
 
@@ -37,7 +37,7 @@ lastVerified: 2026-09-17
 | 面板 UI | `plugins/dsh-codebuddy-plugin/src/client` | 成长任务列表、执行队列、不可自动化项指引；自动签到/自动旅行开关保留在此 |
 | 运营周期开关边界 | `plugins/dsh-codebuddy-plugin/src/client/ui`、`src/components` | 两个开关只在管理面板；设置页不渲染，避免同一件事两个入口 |
 | 管理后台操作区 | `plugins/dsh-codebuddy-plugin/src/client` + host RPC | 提供「完成任务」按钮：串起成长任务（领养前置）、签到与旅行 |
-| 根依赖清单 | `package.json`、`pnpm-lock.yaml` | 声明 `@deepseek-ai/dsh@0.1.5-rc.2`，并补声明 pnpm 隔离布局下不可解析的 `@deepseek-ai/dsh-llm-pi-ai@0.1.5-rc.2` |
+| 根依赖清单 | `package.json`、`pnpm-lock.yaml` | 声明 `@deepseek-ai/dsh@0.1.7-rc.2`，并补声明 pnpm 隔离布局下不可解析的 `@deepseek-ai/dsh-llm-pi-ai@0.1.7-rc.2` |
 | 依赖安装策略 | `pnpm-workspace.yaml` | 显式拒绝 DSH 原生依赖（node-pty、koffi）的安装脚本，去掉交互式占位值 |
 | 启动命令 | `tooling/fn-os-apps-cli/src/commands/start.ts`、`src/core/turbo.ts`、`src/core/process.ts`、`src/config/paths.ts`、`src/ui/prompts.ts` | 增加 `--web` 与「DSH Web」启动目标、本地 CLI 解析、`DSH_HOME` 注入与子进程环境构造 |
 | 本地 DSH_HOME | 仓库根 `.dsh/`（不提交） | 保存本地 profile、凭据、会话与插件调试状态 |
@@ -147,8 +147,8 @@ lastVerified: 2026-09-17
 
 | 任务 ID | 对应验收 | 实现内容 | 验收 |
 | --- | --- | --- | --- |
-| PLAN-FNOS-005-T11-01 | FNOS-005-11-AC-01 | 根 `package.json` 增加 `@deepseek-ai/dsh@0.1.5-rc.2`，版本与 FPK 运行时基线一致 | `node_modules/.bin/dsh --version` 输出 `0.1.5-rc.2` |
-| PLAN-FNOS-005-T11-02 | FNOS-005-11-AC-01 | 补声明 `@deepseek-ai/dsh-llm-pi-ai@0.1.5-rc.2`：它是 `@deepseek-ai/dsh-base` 的依赖，但 pnpm 的 `.pnpm` 隔离布局使其不在 `dsh` 的可见解析路径上，导致 profile 首次启动报 `ERR_MODULE_NOT_FOUND` | 本地 `dsh web` 能装载 `llm-pi-ai` 行并完成启动 |
+| PLAN-FNOS-005-T11-01 | FNOS-005-11-AC-01 | 根 `package.json` 增加 `@deepseek-ai/dsh@0.1.7-rc.2`，版本与 FPK 运行时基线一致 | `node_modules/.bin/dsh --version` 输出 `0.1.7-rc.2` |
+| PLAN-FNOS-005-T11-02 | FNOS-005-11-AC-01 | 补声明 `@deepseek-ai/dsh-llm-pi-ai@0.1.7-rc.2`：它是 `@deepseek-ai/dsh-base` 的依赖，但 pnpm 的 `.pnpm` 隔离布局使其不在 `dsh` 的可见解析路径上，导致 profile 首次启动报 `ERR_MODULE_NOT_FOUND` | 本地 `dsh web` 能装载 `llm-pi-ai` 行并完成启动 |
 | PLAN-FNOS-005-T11-03 | FNOS-005-11-AC-02 | `pnpm-workspace.yaml` 的 `allowBuilds` 把 `@deepseek-ai/dsh-subprocess-local`、`koffi`、`node-pty` 显式置为 `false`，替换 pnpm 写入的交互式占位值 | `pnpm install` 非交互完成且不再提示人工批准构建脚本 |
 
 ### P1：start 增加本地 DSH Web 启动目标

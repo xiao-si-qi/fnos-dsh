@@ -194,7 +194,7 @@ export class CodeBuddyAuthService {
       if (injected.connection === undefined) {
         throw new Error('dsh-codebuddy: connection service is unavailable')
       }
-      // dsh 0.1.5-rc.2 移除了按通道的 `{ authority: 'loopback' }` 信任选项。
+      // dsh 0.1.7-rc.2 移除了按通道的 `{ authority: 'loopback' }` 信任选项。
       // `handle()` 自身已经把 disposer 绑定到当前调用 Context 的生命周期，
       // 不再额外包一层 effect，避免把路由所有权退回 Connection 服务 Context。
       injected.connection.rpc.handle(
