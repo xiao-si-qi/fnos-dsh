@@ -17,7 +17,7 @@ export const name = '@tnnevol/dsh-fnos'
 export const FnosSettingsSchema = z.object({
   [FNOS_SYSTEM_THEME_FIELD]: z.union(['light', 'dark']).volatile(),
   [FNOS_GATEWAY_PROXY_PATHS_FIELD]: z.array(z.string()).volatile(),
-})
+}) as any
 // 新版 DSH：Loader 从 Config 自动派生插件配置，ns = 插件 id
 export const Config = FnosSettingsSchema
 // 新版 settings 的 ns 就是插件 id
