@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-host-webserver'
-import type { SettingsScope } from '@deepseek-ai/dsh-settings'
+import type {} from '@deepseek-ai/dsh-settings'
 import { FNOS_GATEWAY_PROXY_PATHS_FILE, FNOS_GATEWAY_PROXY_PATHS_ROUTE, normalizeGatewayProxyPaths, validateGatewayProxyPaths, type GatewayProxyPathsDocument } from '../contracts/gateway-proxy-contract.ts'
 import type { FnosSettings } from '../contracts/theme-contract.ts'
 
@@ -28,15 +28,35 @@ async function writeDocument(file: string, document: GatewayProxyPathsDocument):
   await rename(temporary, file)
 }
 
-export function registerGatewayProxyRoutes(ctx: Context, settings: SettingsScope<FnosSettings>): void {
+/** 新版 settings 的 ns 是插件 id，不是旧常量。 */
+const PLUGIN_SETTINGS_NS = '@tnnevol/dsh-fnos'
+
+/** 读当前 fnOS 插件配置（新版 settings API）。 */
+function readFnosSettings(ctx: Context): FnosSettings | undefined {
+  const descriptor = ctx.settings.describe({ redactSecrets: true }).find(row => row.ns === PLUGIN_SETTINGS_NS)
+  return descriptor?.value as FnosSettings | undefined
+}
+
+export function registerGatewayProxyRoutes(ctx: Context): void {
   const file = gatewayProxyPathsFile()
   if (file !== undefined) {
-    const sync = (value: FnosSettings): Promise<void> => writeDocument(file, { version: 1, paths: normalizeGatewayProxyPaths(value.gatewayProxyPaths ?? []) ?? [] })
+    const sync = (value: FnosSettings | undefined): Promise<void> =>
+        writeDocument(file, { version: 1, paths: normalizeGatewayProxyPaths(value?.gatewayProxyPaths ?? []) ?? [] })
+
     ctx.effect(() => {
-      void sync(settings.get()).catch(error => { console.error('[dsh-fnos] unable to initialize gateway proxy paths', error) })
-      return settings.watch(async next => { await sync(next) })
+      void sync(readFnosSettings(ctx)).catch(error => {
+        console.error('[dsh-fnos] unable to initialize gateway proxy paths', error)
+      })
+      const handler = (ns: string): void => {
+        if (ns !== PLUGIN_SETTINGS_NS) return
+        void sync(readFnosSettings(ctx)).catch(error => {
+          console.error('[dsh-fnos] unable to sync gateway proxy paths', error)
+        })
+      }
+      return ctx.on('settings/document-updated', handler)
     }, 'dsh-fnos: gateway proxy path settings mirror')
   }
+
   ctx.effect(() => ctx.webServer.register({
     kind: 'exact',
     path: FNOS_GATEWAY_PROXY_PATHS_ROUTE,
@@ -44,14 +64,14 @@ export function registerGatewayProxyRoutes(ctx: Context, settings: SettingsScope
       if (!trusted(req)) return send(res, 403, { error: 'remote-web-origin-not-trusted' })
       const file = gatewayProxyPathsFile()
       if (file === undefined) return send(res, 503, { error: 'fnos-gateway-config-unavailable' })
-      if (req.method === 'GET') return send(res, 200, { version: 1, paths: normalizeGatewayProxyPaths(settings.get().gatewayProxyPaths ?? []) ?? [] })
+      if (req.method === 'GET') return send(res, 200, { version: 1, paths: normalizeGatewayProxyPaths(readFnosSettings(ctx)?.gatewayProxyPaths ?? []) ?? [] })
       if (req.method !== 'PUT') return send(res, 405, { error: 'method-not-allowed' })
       const paths = validateGatewayProxyPaths(await body(req))
       if (paths === undefined) return send(res, 400, { error: 'invalid-gateway-proxy-paths' })
       const document: GatewayProxyPathsDocument = { version: 1, paths }
       const previous = await readDocument(file)
       await writeDocument(file, document)
-      try { await settings.update({ gatewayProxyPaths: paths }) }
+      try { await ctx.settings.update(PLUGIN_SETTINGS_NS, { gatewayProxyPaths: paths }) }
       catch (error) { await writeDocument(file, previous); throw error }
       send(res, 200, document)
     },
