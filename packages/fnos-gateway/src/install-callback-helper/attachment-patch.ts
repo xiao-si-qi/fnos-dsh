@@ -77,10 +77,8 @@ async function ensureDurableHome(path) {
   )
   source = replaceOnce(
       source,
-      '                const dshHome = resolveDshHome(config.dshHome);\n                this.root = join(dshHome, "attachments", "v1");',
-      `/* ${PATCH_MARKER} */
-                const dshHome = resolveDshHome(process.env.TRIM_PKGVAR || config.dshHome);
-                this.root = join(dshHome, "attachments", "v1");`,
+      'const dshHome = resolveDshHome(config.dshHome);',
+      'const dshHome = resolveDshHome(process.env.TRIM_PKGVAR || config.dshHome);',
       'attachment root',
   )
   await atomicWrite(indexPath, source)
