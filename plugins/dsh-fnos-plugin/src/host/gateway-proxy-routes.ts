@@ -33,8 +33,12 @@ const PLUGIN_SETTINGS_NS = '@tnnevol/dsh-fnos'
 
 /** 读当前 fnOS 插件配置（新版 settings API）。 */
 function readFnosSettings(ctx: Context): FnosSettings | undefined {
-  const descriptor = ctx.settings.describe({ redactSecrets: true }).find(row => row.ns === PLUGIN_SETTINGS_NS)
-  return descriptor?.value as FnosSettings | undefined
+  const all = ctx.settings.describe({ redactSecrets: true })
+  console.log('[dsh-fnos][debug] all ns =', JSON.stringify(all.map(r => r.ns)))
+  console.log('[dsh-fnos][debug] want ns =', PLUGIN_SETTINGS_NS)
+  const found = all.find(row => row.ns === PLUGIN_SETTINGS_NS)
+  console.log('[dsh-fnos][debug] matched =', found !== undefined, 'value =', JSON.stringify(found?.value))
+  return found?.value as FnosSettings | undefined
 }
 
 export function registerGatewayProxyRoutes(ctx: Context): void {
