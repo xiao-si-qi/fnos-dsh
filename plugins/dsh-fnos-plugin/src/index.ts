@@ -15,8 +15,8 @@ export const name = '@tnnevol/dsh-fnos'
 
 /** Settings back the fnOS card and the cached pre-plugin theme bootstrap. */
 export const FnosSettingsSchema = z.object({
-  [FNOS_SYSTEM_THEME_FIELD]: z.union(['light', 'dark']),
-  [FNOS_GATEWAY_PROXY_PATHS_FIELD]: z.array(z.string()),
+  [FNOS_SYSTEM_THEME_FIELD]: z.union(['light', 'dark']).volatile(),
+  [FNOS_GATEWAY_PROXY_PATHS_FIELD]: z.array(z.string()).volatile(),
 })
 // 新版 DSH：Loader 从 Config 自动派生插件配置，ns = 插件 id
 export const Config = FnosSettingsSchema
