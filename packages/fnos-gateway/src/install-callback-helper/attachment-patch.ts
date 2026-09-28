@@ -76,12 +76,12 @@ async function ensureDurableHome(path) {
     'durability boundary',
   )
   source = replaceOnce(
-    source,
-    'this.root = resolve(join(resolveDshHome(config.dshHome), "attachments", "v1"));',
-    `/* ${PATCH_MARKER} */
-\tconst attachmentHome = process.env.TRIM_PKGVAR || config.dshHome
-\tthis.root = resolve(join(resolveDshHome(attachmentHome), "attachments", "v1"));`,
-    'attachment root',
+      source,
+      '            const dshHome = resolveDshHome(config.dshHome);\n            this.root = join(dshHome, "attachments", "v1");',
+      `/* ${PATCH_MARKER} */
+            const dshHome = resolveDshHome(process.env.TRIM_PKGVAR || config.dshHome);
+            this.root = join(dshHome, "attachments", "v1");`,
+      'attachment root',
   )
 
   await atomicWrite(indexPath, source)
